@@ -32,16 +32,18 @@ public class Venue {
 	@Column(nullable = false, columnDefinition = "point")
 	private Point location;
 	private Long adminId;
+	private String thumbnailUrl;
 	@Embedded
 	private Images images;
 	@Embedded
 	private Links links;
 
 	@Builder
-	public Venue(String name, String roadNameAddress, String lotNumberAddress, Point location) {
+	public Venue(String name, String roadNameAddress, String lotNumberAddress, Point location, String thumbnailUrl) {
 		this.name = name;
 		this.roadNameAddress = roadNameAddress;
 		this.lotNumberAddress = lotNumberAddress;
 		this.location = location;
+		this.thumbnailUrl = thumbnailUrl;
 	}
 }
