@@ -4,7 +4,7 @@ import static com.querydsl.core.group.GroupBy.*;
 import static kr.codesquad.jazzmeet.show.entity.QShow.*;
 import static kr.codesquad.jazzmeet.venue.entity.QVenue.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
@@ -31,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 public class VenueQueryRepository {
 
 	private static final int NEARBY_VENUES_COUNT = 10;
+	private static final String ADDRESS = "address";
+	private static final String SHOWINFO = "showInfo";
 
 	private final JPAQueryFactory query;
 
@@ -82,11 +84,11 @@ public class VenueQueryRepository {
 		return venues;
 	}
 
-	public Page<VenueSearchData> findVenuesByLocation(Polygon range, Pageable pageable) {
+	public Page<VenueSearchData> findVenuesByLocation(Polygon range, Pageable pageable, LocalDate curDate) {
 		List<VenueSearchData> venueSearchList = query.from(venue)
 			.leftJoin(show)
 			.on(venue.id.eq(show.venue.id))
-			.on(isStartTimeEqCurDate())
+			.on(isStartTimeEqCurDate(curDate))
 			.where(isLocationWithInRange(range))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -96,15 +98,15 @@ public class VenueQueryRepository {
 						venue.id,
 						venue.thumbnailUrl,
 						venue.name,
-						venue.roadNameAddress.as("address"),
+						venue.roadNameAddress.as(ADDRESS),
 						venue.description,
+						venue.location,
 						list(
 							Projections.fields(ShowInfo.class,
 								show.startTime,
 								show.endTime
 							)
-						).as("showInfo"),
-						venue.location)
+						).as(SHOWINFO))
 				)
 			);
 
@@ -125,9 +127,9 @@ public class VenueQueryRepository {
 		return Expressions.booleanTemplate("ST_Within({0}, {1})", venue.location, range);
 	}
 
-	private BooleanExpression isStartTimeEqCurDate() {
+	private BooleanExpression isStartTimeEqCurDate(LocalDate curDate) {
 		return Expressions.stringTemplate("DATE({0})", show.startTime)
-			.eq(Expressions.stringTemplate("CURDATE()"));
+			.eq(Expressions.stringTemplate("DATE({0})", curDate));
 	}
 
 	private JPAQuery<Long> getVenuesByLocationCount(Polygon range) {
@@ -136,12 +138,12 @@ public class VenueQueryRepository {
 			.where(isLocationWithInRange(range));
 	}
 
-	public Page<VenueSearchData> searchVenueList(String word, Pageable pageable, LocalDateTime todayStartTime,
-		LocalDateTime todayEndTime) {
+	public Page<VenueSearchData> searchVenueList(String word, Pageable pageable, LocalDate curDate) {
 		List<VenueSearchData> venueSearchDataList = query.select(venue).from(venue)
 			.leftJoin(show)
-			.on(venue.id.eq(show.venue.id).and(show.startTime.between(todayStartTime, todayEndTime)))
-			.where(venue.name.contains(word).or(venue.roadNameAddress.contains(word)))
+			.on(venue.id.eq(show.venue.id))
+			.on(isStartTimeEqCurDate(curDate))
+			.where(isContainWordInName(word).or(isContainWordInAddress(word)))
 			.limit(pageable.getPageSize())
 			.offset(pageable.getOffset())
 			.transform(
@@ -150,14 +152,14 @@ public class VenueQueryRepository {
 						venue.id,
 						venue.thumbnailUrl,
 						venue.name,
-						venue.roadNameAddress.as("address"),
+						venue.roadNameAddress.as(ADDRESS),
 						venue.description,
 						venue.location,
 						list(
 							Projections.fields(ShowInfo.class,
 								show.startTime,
 								show.endTime
-							)).as("showInfo")
+							)).as(SHOWINFO)
 					)
 				)
 			);
@@ -171,5 +173,30 @@ public class VenueQueryRepository {
 		return query.select(venue.count())
 			.from(venue)
 			.where(venue.name.contains(word).or(venue.roadNameAddress.contains(word)));
+	}
+
+	public List<VenueSearchData> findVenueSearchById(Long venueId, LocalDate curDate) {
+		return query.from(venue)
+			.leftJoin(show)
+			.on(venue.id.eq(show.venue.id))
+			.on(isStartTimeEqCurDate(curDate))
+			.where(venue.id.eq(venueId))
+			.transform(
+				groupBy(venue.id).list(
+					Projections.fields(VenueSearchData.class,
+						venue.id,
+						venue.thumbnailUrl,
+						venue.name,
+						venue.roadNameAddress.as(ADDRESS),
+						venue.description,
+						venue.location,
+						list(
+							Projections.fields(ShowInfo.class,
+								show.startTime,
+								show.endTime
+							)).as(SHOWINFO)
+					)
+				)
+			);
 	}
 }
