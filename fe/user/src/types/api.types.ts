@@ -17,12 +17,31 @@ export type UpcomingShow = {
   showId: number;
   posterUrl: string;
   showName: string;
+} & ShowTime;
+
+export type HasShowDates = {
+  hasShow: number[];
+};
+
+export type ShowDetail = {
+  id: number;
+  posterUrl: string;
+  teamName: string;
+  description: string;
   startTime: string;
   endTime: string;
 };
 
 export type SearchParams = {
   word?: string | null;
+  page?: number | null;
+};
+
+export type SearchBoundsParams = {
+  lowLatitude?: number | null;
+  highLatitude?: number | null;
+  lowLongitude?: number | null;
+  highLongitude?: number | null;
   page?: number | null;
 };
 
@@ -48,3 +67,30 @@ export type ShowTime = {
   startTime: string;
   endTime: string;
 };
+
+export type SearchSuggestion = {
+  id: number;
+  name: string;
+  address: string;
+} & Coordinate;
+
+export type VenueDetailData = {
+  id: number;
+  images: {
+    id: number;
+    url: string;
+  }[];
+  name: string;
+  roadNameAddress: string;
+  lotNumberAddress: string;
+  phoneNumber: string;
+  links: {
+    type: string;
+    url: string;
+  }[];
+  venueHours: {
+    day: string;
+    businessHours: string;
+  }[];
+  description: string;
+} & Coordinate;
