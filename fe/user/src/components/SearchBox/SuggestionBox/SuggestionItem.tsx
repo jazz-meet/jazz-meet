@@ -5,19 +5,24 @@ import { SearchSuggestion } from '~/types/api.types';
 
 type Props = {
   suggestion: SearchSuggestion;
+  active: boolean;
   onClose: () => void;
 };
 
-export const SuggestionItem: React.FC<Props> = ({ suggestion, onClose }) => {
+export const SuggestionItem: React.FC<Props> = ({
+  suggestion,
+  active,
+  onClose,
+}) => {
   const navigate = useNavigate();
 
   const navigateToVenueDetail = () => {
-    navigate(`/map/venues/${suggestion.id}`);
+    navigate(`/map?venueId=${suggestion.id}`);
     onClose();
   };
 
   return (
-    <StyledSuggestionItem onClick={navigateToVenueDetail}>
+    <StyledSuggestionItem onClick={navigateToVenueDetail} $active={active}>
       <RoomRoundedIcon />
       <StyledInformation>
         <h4>{suggestion.name}</h4>
@@ -27,10 +32,11 @@ export const SuggestionItem: React.FC<Props> = ({ suggestion, onClose }) => {
   );
 };
 
-const StyledSuggestionItem = styled.li`
+const StyledSuggestionItem = styled.li<{ $active: boolean }>`
   padding: 12px 16px;
   display: flex;
   gap: 8px;
+  ${({ $active }) => $active && `background-color: #f5f5f5;`}
 
   &:hover,
   &:focus {

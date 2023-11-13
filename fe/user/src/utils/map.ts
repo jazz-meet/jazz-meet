@@ -1,7 +1,7 @@
 import { BASIC_COORDINATE } from '~/constants/COORDINATE';
-import { MARKER_SVG } from '~/constants/MAP';
+import { PIN_SVG, TIED_EIGHTH_NOTES_SVG } from '~/constants/MAP';
 import { Pin } from '~/types/api.types';
-import { Coordinate } from '~/types/map.types';
+import { Coordinate, CoordinateBoundary } from '~/types/map.types';
 
 export const fitBoundsToPins = (pins: Pin[], map: naver.maps.Map) => {
   if (pins.length === 0) {
@@ -45,32 +45,56 @@ export const fitBoundsToCoordinateBoundary = (
   map.fitBounds(bounds);
 };
 
+const generateMarkerContent = (text: string) =>
+  `<div class="marker-container"><div class="marker-icon-container">${TIED_EIGHTH_NOTES_SVG}</div><div class="marker-text">${text}</div></div>`;
+
+export const addMarkersOnMap = (
+  pins: Pin[],
+  map: naver.maps.Map,
+  onMarkerClick: (venueId: number) => void,
+) => {
+  return pins.map((pin) => {
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(pin.latitude, pin.longitude),
+      map: map,
+      icon: {
+        content: generateMarkerContent(pin.name),
+        anchor: new naver.maps.Point(3, 48),
+      },
+    });
+
+    addMarkerClickEvent(marker, () => onMarkerClick(pin.id));
+
+    return marker;
+  });
+};
+
 export const addPinsOnMap = (
   pins: Pin[],
   map: naver.maps.Map,
-  icon: 'marker' | 'pin',
+  onPinClick: (venueId: number) => void,
 ) => {
-  const obj = {
-    marker: {
-      content: MARKER_SVG,
-      anchor: new naver.maps.Point(3, 48),
-    },
-    pin: {
-      // content: MARKER_SVG2,
-      // anchor: new naver.maps.Point(4.5, 7),
-      content: MARKER_SVG,
-      anchor: new naver.maps.Point(3, 48),
-    },
-  };
+  return pins.map((pin) => {
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(pin.latitude, pin.longitude),
+      map: map,
+      icon: {
+        content: PIN_SVG,
+        anchor: new naver.maps.Point(4.5, 7),
+      },
+    });
 
-  return pins.map(
-    (pin) =>
-      new naver.maps.Marker({
-        position: new naver.maps.LatLng(pin.latitude, pin.longitude),
-        map: map,
-        icon: obj[icon],
-      }),
-  );
+    addMarkerClickEvent(marker, () => onPinClick(pin.id));
+
+    return marker;
+  });
+};
+
+const addMarkerClickEvent = (
+  marker: naver.maps.Marker,
+  callBack: () => void,
+) => {
+  naver.maps.Event.addListener(marker, 'click', callBack);
 };
 
 export const getInitMap = (userCoordinate: Coordinate | null) => {
@@ -82,4 +106,21 @@ export const getInitMap = (userCoordinate: Coordinate | null) => {
       initCoordinate.longitude,
     ),
   });
+};
+
+export const getMapBounds = (
+  map: naver.maps.Map,
+): CoordinateBoundary | undefined => {
+  const bounds = map.getBounds();
+
+  if (!(bounds instanceof naver.maps.LatLngBounds)) {
+    return;
+  }
+
+  return {
+    lowLatitude: bounds.south(),
+    highLatitude: bounds.north(),
+    lowLongitude: bounds.west(),
+    highLongitude: bounds.east(),
+  };
 };

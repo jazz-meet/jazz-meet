@@ -4,22 +4,29 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.codesquad.jazzmeet.global.error.CustomException;
-import kr.codesquad.jazzmeet.global.error.statuscode.ErrorCode;
+import kr.codesquad.jazzmeet.global.error.statuscode.ShowErrorCode;
 import kr.codesquad.jazzmeet.show.dto.response.ExistShowCalendarResponse;
+import kr.codesquad.jazzmeet.show.dto.response.ShowByDateAndVenueResponse;
 import kr.codesquad.jazzmeet.show.dto.response.ShowByDateResponse;
 import kr.codesquad.jazzmeet.show.dto.response.UpcomingShowResponse;
 import kr.codesquad.jazzmeet.show.entity.Show;
 import kr.codesquad.jazzmeet.show.mapper.ShowMapper;
 import kr.codesquad.jazzmeet.show.repository.ShowQueryRepository;
 import kr.codesquad.jazzmeet.show.repository.ShowRepository;
+import kr.codesquad.jazzmeet.show.vo.ShowWithVenue;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -39,7 +46,7 @@ public class ShowService {
 		return shows.stream().map(ShowMapper.INSTANCE::toUpcomingShowResponse).toList();
 	}
 
-	public List<ShowByDateResponse> getShows(Long venueId, String date) {
+	public List<ShowByDateAndVenueResponse> getShows(Long venueId, String date) {
 		if (isDate(date)) {
 			return List.of();
 		}
@@ -57,7 +64,7 @@ public class ShowService {
 			LocalDate formattedDate = LocalDate.parse(date, formatter);
 			return formattedDate;
 		} catch (DateTimeParseException e) {
-			throw new CustomException(ErrorCode.NOT_VALID_DATE_FORMAT);
+			throw new CustomException(ShowErrorCode.NOT_VALID_DATE_FORMAT);
 		}
 	}
 
@@ -70,5 +77,26 @@ public class ShowService {
 		List<Integer> existShowsByMonth = showQueryRepository.getExistShowsByMonth(venueId, localDate);
 
 		return new ExistShowCalendarResponse(existShowsByMonth);
+	}
+
+	public ExistShowCalendarResponse getShowCalendar(String date) {
+		LocalDate localDate = getLocalDate(date + FIRST_DAY_OF_MONTH);
+		List<Integer> showCalendar = showQueryRepository.getShowCalendar(localDate);
+
+		return new ExistShowCalendarResponse(showCalendar);
+	}
+
+	public List<ShowByDateResponse> getShowsByDate(String date) {
+		LocalDate localDate = getLocalDate(date);
+		List<ShowWithVenue> showsWithVenue = showQueryRepository.getShowsByDate(localDate);
+
+		return showsWithVenue.stream()
+			.sorted(Comparator.comparing(ShowWithVenue::getCityAndDistrict))
+			.collect(Collectors.groupingBy(ShowWithVenue::getCityAndDistrict,
+				LinkedHashMap::new, Collectors.toList()))
+			.entrySet()
+			.stream()
+			.map(response -> new ShowByDateResponse(response.getKey(), response.getValue()))
+			.toList();
 	}
 }

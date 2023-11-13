@@ -3,6 +3,7 @@ import {
   Pin,
   SearchBoundsParams,
   SearchParams,
+  SearchSuggestion,
   SearchedVenues,
   VenueDetailData,
 } from '~/types/api.types';
@@ -20,15 +21,16 @@ export const getAroundVenues = async (
 };
 
 export const getVenuePinsBySearch = async (word: string): Promise<Pin[]> => {
-  const response = await fetchData(`/api/venues/pins/search${word}`);
+  const response = await fetchData(`/api/venues/pins/search?word=${word}`);
 
   return response.json();
 };
 
 export const getVenuePinsByMapBounds = async (
-  bounds: string,
+  searchBoundsParams: SearchBoundsParams,
 ): Promise<Pin[]> => {
-  const response = await fetchData(`/api/venues/pins/map${bounds}`);
+  const queryString = getQueryString(searchBoundsParams);
+  const response = await fetchData(`/api/venues/pins/map${queryString}`);
 
   return response.json();
 };
@@ -63,19 +65,29 @@ export const getVenuesByKeyword = async (
 };
 
 export const getVenuesByMapBounds = async (
-  searchBoundsParams: SearchBoundsParams = {}
-) => {
+  searchBoundsParams: SearchBoundsParams,
+): Promise<SearchedVenues> => {
   const queryString = getQueryString(searchBoundsParams);
   const response = await fetchData(`/api/venues/map${queryString}`);
 
   return response.json();
 };
 
-export const getSearchSuggestions = async (word: string) => {
+export const getSingleVenue = async (
+  venueId: number,
+): Promise<SearchedVenues> => {
+  const response = await fetchData(`/api/venues/search/${venueId}`);
+
+  return response.json();
+};
+
+export const getSearchSuggestions = async (
+  word: string,
+): Promise<SearchSuggestion[]> => {
   const response = await fetchData(`/api/search?word=${word}`);
 
   return response.json();
-}
+};
 
 export const getVenueDetail = async (
   venueId: string,

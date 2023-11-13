@@ -1,16 +1,11 @@
 package kr.codesquad.jazzmeet.show.dto.response;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-import lombok.Builder;
+import kr.codesquad.jazzmeet.show.vo.ShowWithVenue;
 
-@Builder
 public record ShowByDateResponse(
-	Long id,
-	String posterUrl,
-	String teamName,
-	String description,
-	LocalDateTime startTime,
-	LocalDateTime endTime
+	String region,
+	List<ShowWithVenue> venues
 ) {
 }

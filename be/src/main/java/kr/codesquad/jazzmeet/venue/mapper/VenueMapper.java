@@ -3,12 +3,14 @@ package kr.codesquad.jazzmeet.venue.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.locationtech.jts.geom.Point;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import kr.codesquad.jazzmeet.venue.dto.ShowInfo;
 import kr.codesquad.jazzmeet.venue.dto.VenueSearch;
+import kr.codesquad.jazzmeet.venue.dto.request.VenueCreateRequest;
 import kr.codesquad.jazzmeet.venue.dto.response.NearbyVenueResponse;
 import kr.codesquad.jazzmeet.venue.dto.response.VenueAutocompleteResponse;
 import kr.codesquad.jazzmeet.venue.dto.response.VenueDetailResponse;
@@ -17,6 +19,9 @@ import kr.codesquad.jazzmeet.venue.dto.response.VenueSearchResponse;
 import kr.codesquad.jazzmeet.venue.entity.Venue;
 import kr.codesquad.jazzmeet.venue.vo.NearbyVenue;
 import kr.codesquad.jazzmeet.venue.vo.VenueDetail;
+import kr.codesquad.jazzmeet.venue.vo.VenueDetailImage;
+import kr.codesquad.jazzmeet.venue.vo.VenueDetailLink;
+import kr.codesquad.jazzmeet.venue.vo.VenueDetailVenueHour;
 import kr.codesquad.jazzmeet.venue.vo.VenuePins;
 import kr.codesquad.jazzmeet.venue.vo.VenueSearchData;
 
@@ -38,14 +43,14 @@ public interface VenueMapper {
 	VenuePinsResponse toVenuePinsBySearchResponse(VenuePins venuePinsByWord);
 
 	default VenueSearchResponse toVenueSearchResponse(List<VenueSearch> venueSearchList,
-		long venueCount, int currentPage, long maxPage) {
+		long totalCount, int currentPage, long maxPage) {
 		Integer dummy = null;
-		return toVenueSearchResponse(dummy, venueSearchList, venueCount, currentPage, maxPage);
+		return toVenueSearchResponse(dummy, venueSearchList, totalCount, currentPage, maxPage);
 	}
 
 	@Mapping(target = "venues", source = "venueSearchList")
 	VenueSearchResponse toVenueSearchResponse(Integer dummy, List<VenueSearch> venueSearchList,
-		long venueCount, int currentPage, long maxPage);
+		long totalCount, int currentPage, long maxPage);
 
 	default VenueSearch toVenueSearch(VenueSearchData venueSearchData) {
 		Integer dummy = null;
@@ -64,4 +69,18 @@ public interface VenueMapper {
 	@Mapping(target = "latitude", source = "location.y")
 	@Mapping(target = "longitude", source = "location.x")
 	VenueDetailResponse toVenueDetailResponse(VenueDetail venueDetail);
+
+	default VenueDetail toVenueDetail(Venue venue,
+		List<VenueDetailImage> images, List<VenueDetailLink> links, List<VenueDetailVenueHour> venueHours) {
+		Integer dummy = null;
+		return toVenueDatail(dummy, venue, images, links, venueHours);
+	}
+
+	@Mapping(target = "images", source = "images")
+	@Mapping(target = "links", source = "links")
+	@Mapping(target = "venueHours", source = "venueHours")
+	VenueDetail toVenueDatail(Integer dummy, Venue venue,
+		List<VenueDetailImage> images, List<VenueDetailLink> links, List<VenueDetailVenueHour> venueHours);
+
+	Venue toVenue(VenueCreateRequest venueCreateRequest, Point location, String thumbnailUrl);
 }

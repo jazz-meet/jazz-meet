@@ -1,16 +1,26 @@
 import styled from '@emotion/styled';
-import { VenueList, VenueListProps } from './VenueList';
 import { Outlet } from 'react-router-dom';
+import { SearchedVenues } from '~/types/api.types';
+import { VenueList } from './VenueList';
 
 type Props = {
-  mapRef: React.RefObject<HTMLDivElement>;
-} & VenueListProps;
+  mapElement: React.RefObject<HTMLDivElement>;
+  searchedVenus?: SearchedVenues;
+  handleChangeVenueListPage: (page: number) => void;
+};
 
-export const Panel: React.FC<Props> = ({ mapRef, ...venueListData }) => {
+export const Panel: React.FC<Props> = ({
+  mapElement,
+  searchedVenus,
+  handleChangeVenueListPage,
+}) => {
   return (
     <StyledPanel>
-      <VenueList {...venueListData} />
-      <Outlet context={mapRef} />
+      <VenueList
+        searchedVenus={searchedVenus}
+        handleChangeVenueListPage={handleChangeVenueListPage}
+      />
+      <Outlet context={mapElement} />
     </StyledPanel>
   );
 };

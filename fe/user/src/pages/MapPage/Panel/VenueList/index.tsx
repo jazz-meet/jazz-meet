@@ -1,49 +1,46 @@
 import styled from '@emotion/styled';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Link } from 'react-router-dom';
-import { VenueItem } from './VenueItem';
-import { VenueData } from '~/types/api.types';
 import { PaginationBox } from '~/components/PaginationBox';
+import { VenueItem } from './VenueItem';
+import { SearchedVenues } from '~/types/api.types';
 
-export type VenueListProps = {
-  venueList: VenueData[];
-  venueCount: number;
-  currentPage: number;
-  maxPage: number;
-  updateVenueList: (page: number) => void;
+type Props = {
+  searchedVenus?: SearchedVenues;
+  handleChangeVenueListPage: (page: number) => void;
 };
 
-export const VenueList: React.FC<VenueListProps> = ({
-  venueList,
-  venueCount,
-  currentPage,
-  maxPage,
-  updateVenueList,
+export const VenueList: React.FC<Props> = ({
+  searchedVenus,
+  handleChangeVenueListPage,
 }) => {
-  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
-    updateVenueList(value);
+  const onVenueListPageChange = (
+    _: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    handleChangeVenueListPage(value);
   };
 
   return (
     <StyledVenueList>
       <StyledTotalCount>
         <h2>전체</h2>
-        <span>{venueCount}</span>
+        <span>{searchedVenus?.totalCount ?? 0}</span>
       </StyledTotalCount>
 
-      {venueList.length > 0 ? (
+      {searchedVenus?.venues && searchedVenus.venues.length > 0 ? (
         <>
           <StyledVenues>
-            {venueList.map((venue) => (
+            {searchedVenus.venues.map((venue) => (
               <Link to={`/map/venues/${venue.id}`} key={venue.id}>
                 <VenueItem {...venue} />
               </Link>
             ))}
           </StyledVenues>
           <PaginationBox
-            maxPage={maxPage}
-            currentPage={currentPage}
-            onChange={handlePageChange}
+            maxPage={searchedVenus.maxPage}
+            currentPage={searchedVenus.currentPage}
+            onChange={onVenueListPageChange}
           />
         </>
       ) : (

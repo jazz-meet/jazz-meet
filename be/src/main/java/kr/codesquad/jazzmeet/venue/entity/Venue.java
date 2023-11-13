@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import kr.codesquad.jazzmeet.show.entity.Show;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,12 +41,14 @@ public class Venue {
 	private Long adminId;
 	@Column(length = 500)
 	private String thumbnailUrl;
-	@OneToMany(mappedBy = "venue", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<VenueImage> images = new ArrayList<>();
-	@OneToMany(mappedBy = "venue", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Link> links = new ArrayList<>();
-	@OneToMany(mappedBy = "venue", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "venue", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<VenueHour> venueHours = new ArrayList<>();
+	@OneToMany(mappedBy = "venue", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<Show> shows = new ArrayList<>();
 
 	@Builder
 	public Venue(String name, String roadNameAddress, String lotNumberAddress, String phoneNumber, String description,
@@ -57,5 +60,21 @@ public class Venue {
 		this.description = description;
 		this.location = location;
 		this.thumbnailUrl = thumbnailUrl;
+	}
+
+	// 연관관계 편의 메서드
+	public void addVenueImage(VenueImage venueImage) {
+		images.add(venueImage);
+		venueImage.addVenue(this);
+	}
+
+	public void addLink(Link link) {
+		links.add(link);
+		link.addVenue(this);
+	}
+
+	public void addVenueHour(VenueHour venueHour) {
+		venueHours.add(venueHour);
+		venueHour.addVenue(this);
 	}
 }

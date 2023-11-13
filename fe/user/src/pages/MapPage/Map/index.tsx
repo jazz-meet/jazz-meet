@@ -1,38 +1,34 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useMarkers } from '~/hooks/useMarkers';
-import { useUserCoordinate } from '~/hooks/useUserCoordinate';
+import { useEffect, useState } from 'react';
 import { getInitMap } from '~/utils/map';
 import { MapSearchButton } from './MapSearchButton';
 
 type Props = {
-  mapRef: React.RefObject<HTMLDivElement>;
+  mapElement: React.RefObject<HTMLDivElement>;
+  onMapInitialized: (map: naver.maps.Map) => void;
+  onCurrentViewSearchClick: () => void;
 };
 
-export const Map: React.FC<Props> = ({ mapRef }) => {
-  const { search: searchQueryString } = useLocation();
-  const { userCoordinate } = useUserCoordinate();
+export const Map: React.FC<Props> = ({
+  mapElement,
+  onMapInitialized,
+  onCurrentViewSearchClick,
+}) => {
   const [isShowMapSearchButton, setIsMapShowSearchButton] = useState(false);
   const showMapSearchButton = () => setIsMapShowSearchButton(true);
   const hideMapSearchButton = () => setIsMapShowSearchButton(false);
-  const map = useRef<naver.maps.Map>();
-  const { updatePins } = useMarkers({
-    map,
-    searchQueryString,
-    hideMapSearchButton,
-  });
 
   useEffect(() => {
-    map.current = getInitMap(userCoordinate);
+    const map = getInitMap(null);
+    onMapInitialized(map);
 
     const boundsChangeEventListener = naver.maps.Event.addListener(
-      map.current,
+      map,
       'zoom_changed',
       showMapSearchButton,
     );
     const dragendEventListener = naver.maps.Event.addListener(
-      map.current,
+      map,
       'dragend',
       showMapSearchButton,
     );
@@ -44,14 +40,13 @@ export const Map: React.FC<Props> = ({ mapRef }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    updatePins();
-  }, [updatePins]);
-
   return (
-    <StyledMap id="map" ref={mapRef}>
+    <StyledMap id="map" ref={mapElement}>
       {isShowMapSearchButton && (
-        <MapSearchButton map={map} hideMapSearchButton={hideMapSearchButton} />
+        <MapSearchButton
+          hideMapSearchButton={hideMapSearchButton}
+          onCurrentViewSearchClick={onCurrentViewSearchClick}
+        />
       )}
     </StyledMap>
   );
@@ -60,4 +55,29 @@ export const Map: React.FC<Props> = ({ mapRef }) => {
 const StyledMap = styled.div`
   width: 100%;
   height: inherit;
+
+  .marker-container {
+    background-color: #47484e;
+    white-space: nowrap;
+    border-radius: 24px 24px 24px 3px;
+    padding: 5px 10px 5px 5px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .marker-icon-container {
+    width: 38px;
+    height: 38px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .marker-text {
+    color: #ffffff;
+  }
 `;

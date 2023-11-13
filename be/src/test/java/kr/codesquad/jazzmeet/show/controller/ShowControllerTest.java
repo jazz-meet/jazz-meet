@@ -1,7 +1,9 @@
 package kr.codesquad.jazzmeet.show.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import kr.codesquad.jazzmeet.show.dto.response.ShowByDateResponse;
+import kr.codesquad.jazzmeet.show.dto.response.ExistShowCalendarResponse;
 import kr.codesquad.jazzmeet.show.service.ShowService;
 
 @WebMvcTest(controllers = ShowController.class)
@@ -40,5 +44,43 @@ class ShowControllerTest {
 			)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$", instanceOf(List.class)));
+	}
+
+	@DisplayName("date에 해당하는 달의 공연이 있는 날을 조회한다.")
+	@Test
+	void getShowCalendar() throws Exception {
+		//given
+		String date = "20231107";
+		when(showService.getShowCalendar(date)).thenReturn(new ExistShowCalendarResponse(List.of()));
+
+		//when //then
+		mockMvc.perform(
+				get("/api/shows/calendar")
+					.queryParam("date", date)
+					.contentType(MediaType.APPLICATION_JSON)
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.hasShow", instanceOf(List.class)));
+	}
+
+	@DisplayName("date에 해당하는 날의 공연 목록을 조회한다.")
+	@Test
+	void getShowsByDate() throws Exception {
+		//given
+		String date = "20231101";
+		when(showService.getShowsByDate(date)).thenReturn(List.of(new ShowByDateResponse("서울시 강남구", List.of())));
+
+		//when //then
+		mockMvc.perform(
+				get("/api/shows")
+					.queryParam("date", date)
+					.contentType(MediaType.APPLICATION_JSON)
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", instanceOf(List.class)))
+			.andExpect(jsonPath("$[0].region").value("서울시 강남구"))
+			.andExpect(jsonPath("$[0].venues", instanceOf(List.class)));
 	}
 }
