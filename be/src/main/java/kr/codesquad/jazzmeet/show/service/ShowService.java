@@ -16,10 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.codesquad.jazzmeet.global.error.CustomException;
 import kr.codesquad.jazzmeet.global.error.statuscode.ShowErrorCode;
-import kr.codesquad.jazzmeet.show.dto.ShowResponse;
+import kr.codesquad.jazzmeet.image.entity.Image;
+import kr.codesquad.jazzmeet.image.service.ImageService;
+import kr.codesquad.jazzmeet.show.dto.request.RegisterShowRequest;
 import kr.codesquad.jazzmeet.show.dto.response.ExistShowCalendarResponse;
+import kr.codesquad.jazzmeet.show.dto.response.RegisterShowResponse;
 import kr.codesquad.jazzmeet.show.dto.response.ShowByDateAndVenueResponse;
 import kr.codesquad.jazzmeet.show.dto.response.ShowByDateResponse;
+import kr.codesquad.jazzmeet.show.dto.response.ShowDetailResponse;
+import kr.codesquad.jazzmeet.show.dto.response.ShowResponse;
 import kr.codesquad.jazzmeet.show.dto.response.UpcomingShowResponse;
 import kr.codesquad.jazzmeet.show.entity.Show;
 import kr.codesquad.jazzmeet.show.mapper.ShowMapper;
@@ -27,6 +32,8 @@ import kr.codesquad.jazzmeet.show.repository.ShowQueryRepository;
 import kr.codesquad.jazzmeet.show.repository.ShowRepository;
 import kr.codesquad.jazzmeet.show.vo.ShowSummaryWithVenue;
 import kr.codesquad.jazzmeet.show.vo.ShowWithVenue;
+import kr.codesquad.jazzmeet.venue.entity.Venue;
+import kr.codesquad.jazzmeet.venue.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +48,8 @@ public class ShowService {
 
 	private final ShowRepository showRepository;
 	private final ShowQueryRepository showQueryRepository;
+	private final VenueService venueService;
+	private final ImageService imageService;
 
 	private static final String FIRST_DAY_OF_MONTH = "01";
 
@@ -112,5 +121,27 @@ public class ShowService {
 		Page<ShowSummaryWithVenue> shows = showQueryRepository.getShows(word, pageRequest);
 
 		return ShowMapper.INSTANCE.toShowResponse(shows);
+	}
+
+	public ShowDetailResponse getShowDetail(Long showId) {
+		Show show = getShowById(showId);
+
+		return ShowMapper.INSTANCE.toShowDetailResponse(show);
+	}
+
+	private Show getShowById(Long showId) {
+		return showRepository.findEntireShowById(showId)
+			.orElseThrow(() -> new CustomException(ShowErrorCode.NOT_FOUND_SHOW));
+	}
+
+	@Transactional
+	public RegisterShowResponse registerShow(Long venueId, RegisterShowRequest registerShowRequest) {
+		Venue venue = venueService.findById(venueId);
+		Image poster = imageService.findById(registerShowRequest.posterId());
+		Show show = ShowMapper.INSTANCE.toShow(registerShowRequest, venue, poster);
+
+		Show savedShow = showRepository.save(show);
+
+		return new RegisterShowResponse(savedShow.getId());
 	}
 }
