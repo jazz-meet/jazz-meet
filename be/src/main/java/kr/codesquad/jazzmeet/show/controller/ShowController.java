@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +33,9 @@ public class ShowController {
 
 	private final ShowService showService;
 
+	/**
+	 * 진행 중인 공연 조회 API
+	 */
 	@GetMapping("/api/shows/upcoming")
 	public ResponseEntity<List<UpcomingShowResponse>> getUpcomingShows() {
 		LocalDateTime nowTime = LocalDateTime.now();
@@ -110,5 +115,26 @@ public class ShowController {
 		RegisterShowResponse response = showService.registerShow(venueId, registerShowRequest);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	/**
+	 * 공연 수정 API
+	 */
+	@PutMapping("/api/shows/{showId}")
+	public ResponseEntity<ShowDetailResponse> updateShow(@PathVariable Long showId,
+		@Valid @RequestBody RegisterShowRequest request) {
+		ShowDetailResponse response = showService.updateShow(showId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	/**
+	 * 공연 삭제 API
+	 */
+	@DeleteMapping("/api/shows/{showId}")
+	public ResponseEntity<Void> deleteShow(@PathVariable Long showId) {
+		showService.deleteShow(showId);
+
+		return ResponseEntity.noContent().build();
 	}
 }

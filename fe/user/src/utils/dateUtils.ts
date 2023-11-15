@@ -10,7 +10,7 @@ export const getFormattedYearMonth = (date: Date) => {
   const formattedDate = `${year}${month}`;
 
   return formattedDate;
-};
+}; // ex) 202301
 
 export const getFormattedDate = (date: Date) => {
   const datePart = getFormattedYearMonth(date);
@@ -18,7 +18,7 @@ export const getFormattedDate = (date: Date) => {
   const formattedDate = `${datePart}${day}`;
 
   return formattedDate;
-};
+}; // ex) 20230101
 
 export const getFormattedDateTime = (date: Date) => {
   const datePart = getFormattedDate(date);
@@ -27,6 +27,29 @@ export const getFormattedDateTime = (date: Date) => {
   const formattedDateTime = `${datePart}${hours}${minutes}`;
 
   return formattedDateTime;
+}; // ex) 202301011230
+
+export const getFormattedDateString = (date: string | Date) => {
+  const dateObj = new Date(date);
+
+  return `${dateObj.getFullYear()}.${(dateObj.getMonth() + 1)
+    .toString()
+    .padStart(2, '0')}.${dateObj.getDate().toString().padStart(2, '0')}`;
+}; // ex) 2023.01.01
+
+export const getFormattedTime = (date: Date) => {
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const formattedTime = `${hours}:${minutes}`;
+
+  return formattedTime;
+};
+
+export const getFormattedTimeRange = (start: Date, end: Date) => {
+  const startTime = getFormattedTime(start);
+  const endTime = getFormattedTime(end);
+
+  return `${startTime}-${endTime}`;
 };
 
 export const getFirstDay = (year: number, month: number) => {
