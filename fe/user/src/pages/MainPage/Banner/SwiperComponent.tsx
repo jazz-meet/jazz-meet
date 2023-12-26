@@ -34,18 +34,7 @@ export const SwiperComponent: React.FC<Props> = ({
 };
 
 const StyledCarousel = styled.div`
-  width: 100%;
   user-select: none;
-
-  .swiper {
-    width: 100%;
-    height: 100%;
-  }
-
-  .swiper-slide {
-    width: 100%;
-    height: 100%;
-  }
 
   .swiper-pagination {
     left: -30%;
@@ -59,6 +48,7 @@ const StyledCarousel = styled.div`
 
 const SlideImage = styled.img`
   width: 100%;
-  height: 498px;
+  min-height: 200px;
+  max-height: 400px;
   object-fit: cover;
 `;
