@@ -133,3 +133,9 @@ button {
   border: 0;
   background: inherit;
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}

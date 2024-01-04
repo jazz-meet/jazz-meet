@@ -28,7 +28,7 @@ const StyledMapSearchButton = styled.button`
   position: absolute;
   bottom: 8%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-50%);
   z-index: ${MAP_SEARCH_BUTTON_Z_INDEX};
   padding: 12px 16px;
   border-radius: 50px;
