@@ -2,14 +2,9 @@ import styled from '@emotion/styled';
 import { paintSkeleton } from '~/styles/designSystem';
 
 export const CardListSkeleton: React.FC = () => {
+  const { innerWidth } = window;
   const skeletonCount =
-    window.innerWidth < 640
-      ? 1
-      : window.innerWidth < 960
-      ? 2
-      : window.innerWidth < 1200
-      ? 3
-      : 4;
+    innerWidth < 640 ? 1 : innerWidth < 960 ? 2 : innerWidth < 1200 ? 3 : 4;
 
   return (
     <StyledCardListSkeleton>
