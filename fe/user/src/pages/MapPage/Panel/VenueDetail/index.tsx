@@ -25,7 +25,7 @@ export const VenueDetail: React.FC = () => {
   const [data, setData] = useState<VenueDetailData>();
 
   const backToVenueList = () => {
-    navigate(`/map?${currentLocation.search}`);
+    navigate(`/map${currentLocation.search}`);
   };
 
   useEffect(() => {
