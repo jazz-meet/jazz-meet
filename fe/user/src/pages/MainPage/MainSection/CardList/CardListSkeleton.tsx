@@ -2,31 +2,19 @@ import styled from '@emotion/styled';
 import { paintSkeleton } from '~/styles/designSystem';
 
 export const CardListSkeleton: React.FC = () => {
+  const { innerWidth } = window;
+  const skeletonCount =
+    innerWidth < 640 ? 1 : innerWidth < 960 ? 2 : innerWidth < 1200 ? 3 : 4;
+
   return (
     <StyledCardListSkeleton>
-      <StyledCard>
-        <StyledImage />
-        <StyledText />
-        <StyledText />
-      </StyledCard>
-
-      <StyledCard>
-        <StyledImage />
-        <StyledText />
-        <StyledText />
-      </StyledCard>
-
-      <StyledCard>
-        <StyledImage />
-        <StyledText />
-        <StyledText />
-      </StyledCard>
-
-      <StyledCard>
-        <StyledImage />
-        <StyledText />
-        <StyledText />
-      </StyledCard>
+      {Array.from({ length: skeletonCount }).map((_, index) => (
+        <StyledCard key={index}>
+          <StyledImage />
+          <StyledText />
+          <StyledText />
+        </StyledCard>
+      ))}
     </StyledCardListSkeleton>
   );
 };
@@ -35,6 +23,7 @@ const StyledCardListSkeleton = styled.div`
   width: 100%;
   height: 500px;
   display: flex;
+  justify-content: center;
   gap: 10px;
 `;
 
