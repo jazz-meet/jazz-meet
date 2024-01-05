@@ -2,17 +2,12 @@ import styled from '@emotion/styled';
 
 type Props = {
   url: string;
-}
+};
 
-export const Thumbnail: React.FC<Props> = ({
-  url
-}) => {
+export const Thumbnail: React.FC<Props> = ({ url }) => {
   return (
     <StyledWrapper>
-      <StyledThumbnail
-        src={url}
-        alt=""
-      />
+      <StyledThumbnail src={url} alt="" />
     </StyledWrapper>
   );
 };

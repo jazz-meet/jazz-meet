@@ -8,8 +8,8 @@ type Props = VenueItemData;
 export const VenueItem: React.FC<Props> = (venueData) => {
   return (
     <StyledVenue>
-      <Description {...venueData} />
       <Thumbnail url={venueData.thumbnailUrl} />
+      <Description {...venueData} />
     </StyledVenue>
   );
 };
@@ -28,5 +28,9 @@ const StyledVenue = styled.div`
 
   &:active {
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
   }
 `;
