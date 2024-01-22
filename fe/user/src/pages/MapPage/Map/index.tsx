@@ -59,7 +59,6 @@ const StyledMap = styled.div<{ renderType: RenderType }>`
     renderType === 'all' || renderType === 'map' ? '' : 'display: none;'};
 
   width: 100%;
-  height: inherit;
 
   .marker {
     position: relative;

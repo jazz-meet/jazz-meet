@@ -137,7 +137,8 @@ const MY_LOCATION_BUTTON = 'my-location-button';
 
 const StyledMapPage = styled.div<{ isMobile: boolean }>`
   overflow: hidden;
-  height: ${({ isMobile }) => (isMobile ? 'calc(100% - 60px)' : '100%')};
+  height: ${({ isMobile }) =>
+    isMobile ? 'calc(100% - 60px)' : 'calc(100% - 72px)'};
   display: flex;
 
   .${MY_LOCATION_BUTTON} {
