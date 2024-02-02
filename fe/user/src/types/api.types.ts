@@ -47,6 +47,7 @@ export type VenueDetailData = {
 
 export type UpcomingShow = {
   venueId: number;
+  venueName: string;
   showId: number;
   posterUrl: string;
   teamName: string;
