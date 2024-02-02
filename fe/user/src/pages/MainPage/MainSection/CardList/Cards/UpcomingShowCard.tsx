@@ -42,8 +42,8 @@ export const UpcomingShowCard: React.FC<Props> = ({ upcomingShow }) => {
         <StyledCardImage src={posterUrl} alt="poster" />
       </StyledCardImageContainer>
       <StyledTitleContainer>
-        <StyledTitle>{teamName}</StyledTitle>
-        <StyledSubTitle>{venueName}</StyledSubTitle>
+        <StyledVenueName>{venueName}</StyledVenueName>
+        <StyledTeamName>{teamName}</StyledTeamName>
       </StyledTitleContainer>
       <StyledContentContainer>
         <StyledContent>{date}</StyledContent>
@@ -92,13 +92,13 @@ const StyledCardImage = styled.img`
 
 const StyledTitleContainer = styled.div`
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   gap: 2px;
   font-size: 22px;
   line-height: 140%;
 `;
 
-const StyledTitle = styled.h2`
+const StyledTeamName = styled.h2`
   font-weight: 600;
   letter-spacing: -1px;
 
@@ -107,7 +107,7 @@ const StyledTitle = styled.h2`
   }
 `;
 
-const StyledSubTitle = styled.div`
+const StyledVenueName = styled.div`
   font-weight: 300;
   color: #141313;
 `;
