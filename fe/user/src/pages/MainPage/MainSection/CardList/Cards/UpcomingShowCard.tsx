@@ -3,14 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useShowDetailStore } from '~/stores/useShowDetailStore';
 import { UpcomingShow } from '~/types/api.types';
+import { getFormattedDateString } from '~/utils/dateUtils';
 
 type Props = {
   upcomingShow: UpcomingShow;
 };
 
 export const UpcomingShowCard: React.FC<Props> = ({ upcomingShow }) => {
-  const { venueId, showId, posterUrl, teamName, startTime, endTime } =
-    upcomingShow;
+  const {
+    venueId,
+    venueName,
+    showId,
+    posterUrl,
+    teamName,
+    startTime,
+    endTime,
+  } = upcomingShow;
   const navigate = useNavigate();
   const { setShowDetailId, setShowDetailDate } = useShowDetailStore(
     useShallow((state) => ({
@@ -18,6 +26,10 @@ export const UpcomingShowCard: React.FC<Props> = ({ upcomingShow }) => {
       setShowDetailDate: state.setShowDetailDate,
     })),
   );
+
+  const date = getFormattedDateString(startTime);
+  const timeRange = `${formatTime(startTime)} ~ ${formatTime(endTime)}`;
+
   const goToShowDetail = () => {
     setShowDetailId(showId);
     setShowDetailDate(new Date(startTime));
@@ -28,11 +40,13 @@ export const UpcomingShowCard: React.FC<Props> = ({ upcomingShow }) => {
     <StyledCard onClick={() => goToShowDetail()}>
       <StyledCardImage src={posterUrl} alt="poster" />
       <StyledTitleContainer>
-        <StyledTitle>{teamName}</StyledTitle>
-        <StyledSubTitle>{`${formatTime(startTime)} ~ ${formatTime(
-          endTime,
-        )}`}</StyledSubTitle>
+        <StyledTitle>{venueName}</StyledTitle>
+        <StyledSubTitle>{teamName}</StyledSubTitle>
       </StyledTitleContainer>
+      <StyledContentContainer>
+        <StyledContent>{date}</StyledContent>
+        <StyledContent>{timeRange}</StyledContent>
+      </StyledContentContainer>
     </StyledCard>
   );
 };
@@ -61,19 +75,30 @@ const StyledTitleContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2px;
+  font-size: 22px;
+  line-height: 140%;
 `;
 
 const StyledTitle = styled.div`
-  font-size: 22px;
-  font-weight: bold;
-  line-height: 140%;
+  font-weight: 300;
   color: #141313;
 `;
 
 const StyledSubTitle = styled.div`
-  font-size: 22px;
-  font-weight: medium;
-  line-height: 140%;
+  font-weight: bold;
   letter-spacing: -1px;
+`;
+
+const StyledContentContainer = styled.div`
+  margin-top: 8px;
+  display: flex;
+  gap: 2px;
   color: #686970;
+`;
+
+const StyledContent = styled.div`
+  &:not(:last-of-type)::after {
+    content: '|';
+    margin: 0 8px;
+  }
 `;
