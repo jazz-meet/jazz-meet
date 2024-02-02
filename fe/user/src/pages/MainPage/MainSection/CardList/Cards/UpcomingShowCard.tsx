@@ -38,10 +38,12 @@ export const UpcomingShowCard: React.FC<Props> = ({ upcomingShow }) => {
 
   return (
     <StyledCard onClick={() => goToShowDetail()}>
-      <StyledCardImage src={posterUrl} alt="poster" />
+      <StyledCardImageContainer>
+        <StyledCardImage src={posterUrl} alt="poster" />
+      </StyledCardImageContainer>
       <StyledTitleContainer>
-        <StyledTitle>{venueName}</StyledTitle>
-        <StyledSubTitle>{teamName}</StyledSubTitle>
+        <StyledTitle>{teamName}</StyledTitle>
+        <StyledSubTitle>{venueName}</StyledSubTitle>
       </StyledTitleContainer>
       <StyledContentContainer>
         <StyledContent>{date}</StyledContent>
@@ -62,31 +64,52 @@ const StyledCard = styled.div`
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 37px;
+
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
+const StyledCardImageContainer = styled.div`
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 24px;
+
+  ${StyledCard}:hover & {
+    opacity: 0.7;
+  }
 `;
 
 const StyledCardImage = styled.img`
   width: 100%;
-  height: 380px;
   object-fit: cover;
-  margin-bottom: 24px;
+  transition: transform 0.3s ease-in-out;
+
+  ${StyledCard}:hover & {
+    transform: scale(1.05);
+  }
 `;
 
 const StyledTitleContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 2px;
   font-size: 22px;
   line-height: 140%;
 `;
 
-const StyledTitle = styled.div`
-  font-weight: 300;
-  color: #141313;
+const StyledTitle = styled.h2`
+  font-weight: 600;
+  letter-spacing: -1px;
+
+  ${StyledCard}:hover & {
+    text-decoration: underline;
+  }
 `;
 
 const StyledSubTitle = styled.div`
-  font-weight: bold;
-  letter-spacing: -1px;
+  font-weight: 300;
+  color: #141313;
 `;
 
 const StyledContentContainer = styled.div`
