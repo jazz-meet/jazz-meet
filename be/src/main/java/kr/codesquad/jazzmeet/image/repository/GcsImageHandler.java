@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 
@@ -76,5 +78,21 @@ public class GcsImageHandler {
 			throw new CustomException(ImageErrorCode.WRONG_IMAGE_FORMAT);
 		}
 		return fileName.substring(lastDotIndex + 1).toLowerCase();
+	}
+
+	public List<String> deleteImages(List<String> imageUrls) {
+		try {
+			for (String url : imageUrls) {
+				Blob blob = storage.get(bucketName, url);
+				if (blob == null) {
+					System.out.println("The object " + url + " wasn't found in " + bucketName);
+				}
+				BlobId blobId = blob.getBlobId();
+				storage.delete(blobId);
+			}
+		} catch (Exception e) {
+			throw new CustomException(ImageErrorCode.IMAGE_DELETE_ERROR);
+		}
+		return imageUrls;
 	}
 }
