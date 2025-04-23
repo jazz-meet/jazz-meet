@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 import kr.codesquad.jazzmeet.global.error.CustomException;
 import kr.codesquad.jazzmeet.global.error.statuscode.ShowErrorCode;
 import kr.codesquad.jazzmeet.global.util.CustomLocalDate;
+import kr.codesquad.jazzmeet.image.service.CloudService;
 import kr.codesquad.jazzmeet.image.service.ImageService;
+import kr.codesquad.jazzmeet.image.util.ImageUtil;
 import kr.codesquad.jazzmeet.show.dto.request.RegisterShowRequest;
 import kr.codesquad.jazzmeet.show.mapper.ShowMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class ResponseParser {
 	private static final int ENTRY55_RUNTIME = 55;
 	private static final String NOT_FOUND_MATCHED_TEMPLATE = "not found matched template";
 
+	private final CloudService cloudService;
 	private final ImageService imageService;
 
 	public List<RegisterShowRequest> toRegisterShowRequest(String venueName, StringBuffer response,
@@ -125,6 +128,7 @@ public class ResponseParser {
 			throw new CustomException(ShowErrorCode.OCR_NOT_EQUAL_TEAMS_AND_POSTER_NUMBERS);
 		}
 
+		cloudService.uploadImages(ImageUtil.convertImageUrlToMultipartFile(posterUrls));
 		List<Long> posterIds = imageService.uploadPosters(posterUrls);
 
 		for (int i = 0; i < splitedArtists.length; i += 2) {
