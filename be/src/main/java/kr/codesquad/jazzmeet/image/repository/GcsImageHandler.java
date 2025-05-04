@@ -52,7 +52,7 @@ public class GcsImageHandler {
 	// 파일명 중복 방지
 	private String createFileName(String fileName) {
 		validateFileName(fileName);
-		return UUID.randomUUID() + fileName;
+		return UUID.randomUUID() + "-" + fileName;
 	}
 
 	// 파일 확장자 유효성 검사
@@ -82,10 +82,12 @@ public class GcsImageHandler {
 
 	public List<String> deleteImages(List<String> imageUrls) {
 		try {
+			String prefix = GCS_FILE_PREFIX + "/" + bucketName + "/";
 			for (String url : imageUrls) {
-				Blob blob = storage.get(bucketName, url);
+				String blobString = url.substring(prefix.length() - 1);
+				Blob blob = storage.get(bucketName, blobString);
 				if (blob == null) {
-					System.out.println("The object " + url + " wasn't found in " + bucketName);
+					System.out.println("The object " + blobString + " wasn't found in " + bucketName);
 				}
 				BlobId blobId = blob.getBlobId();
 				storage.delete(blobId);
