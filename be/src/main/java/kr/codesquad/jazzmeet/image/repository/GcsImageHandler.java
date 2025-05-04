@@ -1,67 +1,58 @@
 package kr.codesquad.jazzmeet.image.repository;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 
 import kr.codesquad.jazzmeet.global.error.CustomException;
 import kr.codesquad.jazzmeet.global.error.statuscode.ImageErrorCode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
+@Component
 @RequiredArgsConstructor
-// @Component
-@Slf4j
-public class S3ImageHandler {
+public class GcsImageHandler {
 
-	private static final String IMAGE_DIRECTORY = "images/";
-	public static final int FILE_NAME_SEPARATE_INDEX = 4;
+	@Value("${spring.cloud.gcp.storage.bucket}")
+	private String bucketName;
 
-	private final AmazonS3Client amazonS3Client;
+	private static final String GCS_FILE_PREFIX = "https://storage.googleapis.com/";
 
-	@Value("${cloud.aws.s3.bucket}")
-	private String bucket;
+	private final Storage storage;
 
 	public List<String> uploadImages(List<MultipartFile> multipartFiles) {
 		List<String> imageUrls = new ArrayList<>();
 		for (MultipartFile file : multipartFiles) {
-			String imageUrl = uploadImage(file, IMAGE_DIRECTORY);
-			imageUrls.add(imageUrl);
+			String fileName = createFileName(file.getOriginalFilename());
+			String contentType = file.getContentType();
+			try {
+				BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName)
+					.setContentType(contentType)
+					.build();
+				storage.create(blobInfo, file.getBytes());
+			} catch (IOException e) {
+				throw new CustomException(ImageErrorCode.IMAGE_UPLOAD_ERROR);
+			}
+
+			String url = GCS_FILE_PREFIX + bucketName + "/" + fileName;
+			imageUrls.add(url);
 		}
 		return imageUrls;
-	}
-
-	public String uploadImage(MultipartFile file, String dir) {
-		try (InputStream inputStream = file.getInputStream()) {
-			String fileName = createFileName(file.getOriginalFilename());
-			ObjectMetadata objectMetadata = new ObjectMetadata();
-			objectMetadata.setContentLength(file.getSize());
-			objectMetadata.setContentType(file.getContentType());
-
-			amazonS3Client.putObject(
-				new PutObjectRequest(bucket, dir + fileName, inputStream, objectMetadata)
-					.withCannedAcl(CannedAccessControlList.PublicRead));	// PublicRead 권한으로 업로드
-			return amazonS3Client.getUrl(bucket, dir + fileName).toString();
-		} catch (IOException e) {
-			throw new CustomException(ImageErrorCode.IMAGE_UPLOAD_ERROR);
-		}
 	}
 
 	// 파일명 중복 방지
 	private String createFileName(String fileName) {
 		validateFileName(fileName);
-		return UUID.randomUUID() + fileName;
+		return UUID.randomUUID() + "-" + fileName;
 	}
 
 	// 파일 확장자 유효성 검사
@@ -91,12 +82,16 @@ public class S3ImageHandler {
 
 	public List<String> deleteImages(List<String> imageUrls) {
 		try {
-			String[] keys = imageUrls.stream()
-				.map(url -> IMAGE_DIRECTORY + url.split("/")[FILE_NAME_SEPARATE_INDEX])
-				.toArray(String[]::new);
-			DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucket).withKeys(keys);
-
-			amazonS3Client.deleteObjects(deleteObjectsRequest);
+			String prefix = GCS_FILE_PREFIX + "/" + bucketName + "/";
+			for (String url : imageUrls) {
+				String blobString = url.substring(prefix.length() - 1);
+				Blob blob = storage.get(bucketName, blobString);
+				if (blob == null) {
+					System.out.println("The object " + blobString + " wasn't found in " + bucketName);
+				}
+				BlobId blobId = blob.getBlobId();
+				storage.delete(blobId);
+			}
 		} catch (Exception e) {
 			throw new CustomException(ImageErrorCode.IMAGE_DELETE_ERROR);
 		}

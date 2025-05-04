@@ -3,6 +3,7 @@ package kr.codesquad.jazzmeet.image.repository;
 import static kr.codesquad.jazzmeet.image.entity.QImage.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -31,7 +32,8 @@ public class ImageQueryRepository {
 	}
 
 	private BooleanExpression isDifferentDate(LocalDate date) {
-		return image.createdAt.dayOfYear().ne(date.getDayOfYear());
+		LocalDateTime startDate = date.atStartOfDay();
+		return image.createdAt.before(startDate);
 	}
 
 	public void deleteAllInUrls(List<String> urls) {
