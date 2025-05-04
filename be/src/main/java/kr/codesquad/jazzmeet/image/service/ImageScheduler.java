@@ -18,8 +18,9 @@ public class ImageScheduler {
 	public void deleteNotRegisteredImages() {
 		List<String> imageUrls = imageService.findNotRegisteredImageUrls();
 
-		List<String> deletedImageUrls = cloudService.deleteImages(imageUrls);
-
-		imageService.deleteImagesByUrls(deletedImageUrls);
+		if (!imageUrls.isEmpty()) {
+			List<String> deletedImageUrls = cloudService.deleteImages(imageUrls);
+			imageService.deleteImagesByUrls(deletedImageUrls);
+		}
 	}
 }
